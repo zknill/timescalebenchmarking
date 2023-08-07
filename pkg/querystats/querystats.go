@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/csv"
 	"hash/fnv"
+	"log"
 	"os"
 	"sync"
 	"time"
@@ -70,8 +71,14 @@ func (w Worker) work(wg *sync.WaitGroup) {
 
 	for record := range w.records {
 		n := time.Now()
-		w.db.CPUStats(context.Background(), record.Hostname, record.StartTime, record.EndTime)
+
+		_, err := w.db.CPUStats(context.Background(), record.Hostname, record.StartTime, record.EndTime)
 		elapsed := time.Now().Sub(n)
+
+		if err != nil {
+			log.Println("[ERROR]", err)
+		}
+
 		w.results <- elapsed
 	}
 }

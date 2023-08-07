@@ -1,0 +1,11 @@
+FROM timescale/timescaledb:latest-pg14
+
+ENV POSTGRES_PASSWORD=password
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_DB=homework
+
+COPY ./cpu_usage.sql .
+COPY ./cpu_usage.csv .
+COPY ./init.sh .
+
+CMD ["./init.sh"]

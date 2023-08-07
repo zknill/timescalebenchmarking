@@ -26,7 +26,7 @@ func main() {
 	}
 
 	// database pool
-	db, err := sql.Open("pgx", "host=localhost database=homework password=password")
+	db, err := sql.Open("pgx", "host=timescaledb user=postgres database=homework password=password")
 	if err != nil {
 		log.Fatal("open db", err)
 	}

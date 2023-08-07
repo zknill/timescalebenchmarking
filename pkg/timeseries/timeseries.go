@@ -13,16 +13,16 @@ SELECT time_bucket('1 minute', ts) AS minute_bucket,
        MIN(usage) AS min_cpu_usage,
        MAX(usage) AS max_cpu_usage
 FROM cpu_usage
-WHERE host = ?
-  AND ts >= ? AND ts <= ?
+WHERE host = $1 AND ts >= $2 AND ts <= $3
 GROUP BY minute_bucket, host
 ORDER BY minute_bucket;
 `
 
 type CPUStats struct {
-	Host string
-	Min  float64
-	Max  float64
+	Bucket time.Time
+	Host   string
+	Min    float64
+	Max    float64
 }
 
 type DB struct {
@@ -43,17 +43,18 @@ func (db *DB) CPUStats(ctx context.Context, host string, start, end time.Time) (
 		return nil, fmt.Errorf("rows: %w", err)
 	}
 
+	defer rows.Close()
+
 	stats := []CPUStats{}
 
 	for rows.Next() {
 		s := CPUStats{}
 
-		if err := rows.Scan(&(s.Host), &(s.Min), &(s.Max)); err != nil {
+		if err := rows.Scan(&(s.Bucket), &(s.Host), &(s.Min), &(s.Max)); err != nil {
 			return nil, fmt.Errorf("scan: %w", err)
 		}
 
 		stats = append(stats, s)
-
 	}
 
 	return stats, nil
